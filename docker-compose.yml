@@ -1,0 +1,30 @@
+services:
+  gs_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Override if you want a different LibTorch build.
+        # Must match your base CUDA runtime reasonably (e.g., cu121 works on CUDA 12.x drivers).
+        LIBTORCH_URL: "https://download.pytorch.org/libtorch/cu121/libtorch-cxx11-abi-shared-with-deps-2.3.1%2Bcu121.zip"
+    image: gs_cuda:latest
+    # NVIDIA Container Toolkit (modern compose)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      # Mount your dataset read-only
+      - ./data:/data:ro
+      # Mount outputs
+      - ./output:/workspace/output
+    working_dir: /workspace
+    # Override command as needed; your app should read paths from args/env.
+    # Example shown; update once your main.cpp accepts CLI args.
+    command: ["/workspace/build/gs_app"]

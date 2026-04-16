@@ -1,0 +1,40 @@
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# ---- system deps ----
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    git \
+    wget \
+    unzip \
+    cmake \
+    pkg-config \
+    libopencv-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---- libtorch (CUDA) ----
+# Pin a LibTorch CUDA build that matches the CUDA runtime major version.
+# You can override at build time: --build-arg LIBTORCH_URL=...
+ARG LIBTORCH_URL=https://download.pytorch.org/libtorch/cu121/libtorch-cxx11-abi-shared-with-deps-2.3.1%2Bcu121.zip
+RUN mkdir -p /opt/libtorch \
+ && wget -O /tmp/libtorch.zip "${LIBTORCH_URL}" \
+ && unzip -q /tmp/libtorch.zip -d /opt \
+ && rm /tmp/libtorch.zip
+
+ENV CMAKE_PREFIX_PATH=/opt/libtorch
+ENV Torch_DIR=/opt/libtorch/share/cmake/Torch
+
+# ---- workspace ----
+WORKDIR /workspace
+
+# Copy source
+COPY . /workspace
+
+# Build (Release by default)
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+ && cmake --build build -j
+
+# Default command: run binary (user can override)
+CMD ["/workspace/build/gs_app"]
