@@ -33,7 +33,7 @@ WORKDIR /workspace
 COPY . /workspace
 
 # Build (Release by default)
-RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_ARCHITECTURES="75;86;89" \
  && cmake --build build -j
 
 # Default command: run binary (user can override)
