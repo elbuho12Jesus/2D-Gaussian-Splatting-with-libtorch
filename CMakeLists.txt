@@ -6,17 +6,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
+# ---- User-configurable paths (no hardcode obligatorio) ----
+# En Windows puedes setear Torch_DIR / OpenCV_DIR desde cmake-gui o CLI.
+# En Ubuntu normalmente usarás -DCMAKE_PREFIX_PATH=/path/to/libtorch
+set(Torch_DIR "" CACHE PATH "Path to libtorch/share/cmake/Torch (optional if using CMAKE_PREFIX_PATH)")
+set(OpenCV_DIR "" CACHE PATH "Path to OpenCVConfig.cmake folder (optional)")
+
 # ---- CUDA archs (portable) ----
 # Puedes override desde CLI: -DCMAKE_CUDA_ARCHITECTURES="75;86;89"
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "OFF")
   set(CMAKE_CUDA_ARCHITECTURES "75;86;89" CACHE STRING "" FORCE)
 endif()
 
-# ---- User-configurable paths (no hardcode obligatorio) ----
-# En Windows puedes setear Torch_DIR / OpenCV_DIR desde cmake-gui o CLI.
-# En Ubuntu normalmente usarás -DCMAKE_PREFIX_PATH=/path/to/libtorch
-set(Torch_DIR "" CACHE PATH "Path to libtorch/share/cmake/Torch (optional if using CMAKE_PREFIX_PATH)")
-set(OpenCV_DIR "" CACHE PATH "Path to OpenCVConfig.cmake folder (optional)")
+if(NOT DEFINED TORCH_CUDA_ARCH_LIST OR TORCH_CUDA_ARCH_LIST STREQUAL "")
+  set(TORCH_CUDA_ARCH_LIST "7.5;8.6;8.9" CACHE STRING "Torch CUDA arch list" FORCE)
+endif()
 
 # ---- Dependencies ----
 find_package(Torch REQUIRED)
